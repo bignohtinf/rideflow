@@ -1,16 +1,8 @@
-"""
-Chia raw_data.parquet thành 2 phần theo thời gian:
-  - train.parquet      → dùng để huấn luyện model offline
-  - production.parquet → giả lập data production, sẽ được ingest dần vào pipeline
-"""
 import pandas as pd
 
 df = pd.read_parquet("data/storage/raw_data.parquet")
 df["date"] = pd.to_datetime(df["date"])
 
-# [FIX] BUG: was df.sort_values("date".reset_index(drop=True))
-#   — gọi .reset_index() trên string "date" → AttributeError
-#   Sửa: sort trước, reset_index sau
 df = df.sort_values("date").reset_index(drop=True)
 
 split_idx = int(len(df) * 0.8)
