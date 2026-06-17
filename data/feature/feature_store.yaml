@@ -1,0 +1,18 @@
+project: rideflow
+provider: aws
+registry: s3://rideflow/feast/registry.db
+
+offline_store:
+  type: redshift
+  workgroup: rideflow-wg
+  database: rideflow-db
+  region: us-east-1
+  user: admin
+  s3_staging_location: s3://rideflow/feast-staging/
+  iam_role: arn:aws:iam::516909141871:role/rideflow-redshift
+
+online_store:
+  type: redis
+  connection_string: rideflow-redis-kc2mug.serverless.use1.cache.amazonaws.com:6379
+
+entity_key_serialization_version: 3

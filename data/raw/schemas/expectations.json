@@ -1,0 +1,97 @@
+{
+    "suite_name": "rides_processed_suite",
+    "expectations": [
+        {
+            "type": "expect_column_values_to_not_be_null",
+            "column": "order_id"
+        },
+        {
+            "type": "expect_column_values_to_not_be_null",
+            "column": "is_completed"
+        },
+        {
+            "type": "expect_column_values_to_not_be_null",
+            "column": "date"
+        },
+        {
+            "type": "expect_column_values_to_be_unique",
+            "column": "order_id"
+        },
+        {
+            "type": "expect_column_values_to_be_in_set",
+            "column": "is_completed",
+            "value_set": [
+                0,
+                1
+            ]
+        },
+        {
+            "type": "expect_column_values_to_be_in_set",
+            "column": "travel_mode",
+            "value_set": [
+                1,
+                2,
+                3
+            ]
+        },
+        {
+            "type": "expect_column_values_to_be_in_set",
+            "column": "rush_hour",
+            "value_set": [
+                0.0,
+                1.0
+            ]
+        },
+        {
+            "type": "expect_column_values_to_be_between",
+            "column": "hour_of_day",
+            "min_value": 0,
+            "max_value": 23
+        },
+        {
+            "type": "expect_column_values_to_be_between",
+            "column": "minute_of_hour",
+            "min_value": 0,
+            "max_value": 59
+        },
+        {
+            "type": "expect_column_values_to_be_between",
+            "column": "distance",
+            "min_value": 0
+        },
+        {
+            "type": "expect_column_values_to_be_between",
+            "column": "total_fee",
+            "min_value": 0
+        },
+        {
+            "type": "expect_column_values_to_be_between",
+            "column": "total_pay",
+            "min_value": 0
+        },
+        {
+            "type": "expect_column_values_to_be_between",
+            "column": "user_waiting_time_seconds",
+            "min_value": 0
+        },
+        {
+            "type": "expect_column_values_to_be_between",
+            "column": "num_drivers",
+            "min_value": 1
+        },
+        {
+            "type": "expect_column_values_to_not_be_null",
+            "column": "eta_std"
+        },
+        {
+            "type": "expect_column_values_to_not_be_null",
+            "column": "eda_std"
+        },
+        {
+            "type": "expect_column_mean_to_be_between",
+            "column": "is_completed",
+            "min_value": 0.5,
+            "max_value": 0.9
+        }
+    ]
+}

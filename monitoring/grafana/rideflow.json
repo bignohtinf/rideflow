@@ -1,0 +1,298 @@
+{
+    "title": "RideFlow MLOps",
+    "uid": "rideflow-mlops",
+    "timezone": "browser",
+    "refresh": "5m",
+    "panels": [
+        {
+            "id": 1,
+            "type": "stat",
+            "title": "Model AUC-ROC",
+            "gridPos": {
+                "x": 0,
+                "y": 0,
+                "w": 4,
+                "h": 4
+            },
+            "targets": [
+                {
+                    "expr": "model_auc_roc",
+                    "datasource": "Prometheus"
+                }
+            ],
+            "options": {
+                "colorMode": "background",
+                "thresholds": {
+                    "steps": [
+                        {
+                            "value": 0,
+                            "color": "red"
+                        },
+                        {
+                            "value": 0.80,
+                            "color": "yellow"
+                        },
+                        {
+                            "value": 0.84,
+                            "color": "green"
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "id": 2,
+            "type": "stat",
+            "title": "Log Loss",
+            "gridPos": {
+                "x": 4,
+                "y": 0,
+                "w": 4,
+                "h": 4
+            },
+            "targets": [
+                {
+                    "expr": "model_log_loss",
+                    "datasource": "Prometheus"
+                }
+            ],
+            "options": {
+                "colorMode": "background",
+                "thresholds": {
+                    "steps": [
+                        {
+                            "value": 0,
+                            "color": "green"
+                        },
+                        {
+                            "value": 0.25,
+                            "color": "yellow"
+                        },
+                        {
+                            "value": 0.35,
+                            "color": "red"
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "id": 3,
+            "type": "stat",
+            "title": "Drift Share",
+            "gridPos": {
+                "x": 8,
+                "y": 0,
+                "w": 4,
+                "h": 4
+            },
+            "targets": [
+                {
+                    "expr": "drift_share",
+                    "datasource": "Prometheus"
+                }
+            ],
+            "options": {
+                "colorMode": "background",
+                "unit": "percentunit",
+                "thresholds": {
+                    "steps": [
+                        {
+                            "value": 0,
+                            "color": "green"
+                        },
+                        {
+                            "value": 0.2,
+                            "color": "yellow"
+                        },
+                        {
+                            "value": 0.4,
+                            "color": "red"
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "id": 4,
+            "type": "stat",
+            "title": "Prediction Volume",
+            "gridPos": {
+                "x": 12,
+                "y": 0,
+                "w": 4,
+                "h": 4
+            },
+            "targets": [
+                {
+                    "expr": "prediction_volume",
+                    "datasource": "Prometheus"
+                }
+            ],
+            "options": {
+                "colorMode": "value"
+            }
+        },
+        {
+            "id": 5,
+            "type": "stat",
+            "title": "Completion Rate",
+            "gridPos": {
+                "x": 16,
+                "y": 0,
+                "w": 4,
+                "h": 4
+            },
+            "targets": [
+                {
+                    "expr": "prediction_completion_rate",
+                    "datasource": "Prometheus"
+                }
+            ],
+            "options": {
+                "unit": "percentunit",
+                "colorMode": "background",
+                "thresholds": {
+                    "steps": [
+                        {
+                            "value": 0,
+                            "color": "red"
+                        },
+                        {
+                            "value": 0.65,
+                            "color": "yellow"
+                        },
+                        {
+                            "value": 0.75,
+                            "color": "green"
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "id": 6,
+            "type": "stat",
+            "title": "Drift Detected",
+            "gridPos": {
+                "x": 20,
+                "y": 0,
+                "w": 4,
+                "h": 4
+            },
+            "targets": [
+                {
+                    "expr": "drift_detected",
+                    "datasource": "Prometheus"
+                }
+            ],
+            "options": {
+                "colorMode": "background",
+                "mappings": [
+                    {
+                        "value": 0,
+                        "text": "OK",
+                        "color": "green"
+                    },
+                    {
+                        "value": 1,
+                        "text": "DRIFTED",
+                        "color": "red"
+                    }
+                ]
+            }
+        },
+        {
+            "id": 7,
+            "type": "timeseries",
+            "title": "AUC-ROC Over Time",
+            "gridPos": {
+                "x": 0,
+                "y": 4,
+                "w": 12,
+                "h": 8
+            },
+            "targets": [
+                {
+                    "expr": "model_auc_roc",
+                    "legendFormat": "AUC-ROC",
+                    "datasource": "Prometheus"
+                }
+            ],
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "fixedColor": "#3b82f6",
+                        "mode": "fixed"
+                    },
+                    "custom": {
+                        "fillOpacity": 10,
+                        "lineWidth": 2
+                    },
+                    "thresholds": {
+                        "steps": [
+                            {
+                                "value": 0.80,
+                                "color": "red"
+                            }
+                        ]
+                    }
+                }
+            }
+        },
+        {
+            "id": 8,
+            "type": "timeseries",
+            "title": "Drift Share Over Time",
+            "gridPos": {
+                "x": 12,
+                "y": 4,
+                "w": 12,
+                "h": 8
+            },
+            "targets": [
+                {
+                    "expr": "drift_share",
+                    "legendFormat": "Drift Share",
+                    "datasource": "Prometheus"
+                }
+            ],
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "fixedColor": "#f59e0b",
+                        "mode": "fixed"
+                    },
+                    "custom": {
+                        "fillOpacity": 10,
+                        "lineWidth": 2
+                    },
+                    "unit": "percentunit"
+                }
+            }
+        },
+        {
+            "id": 9,
+            "type": "timeseries",
+            "title": "Prediction Volume & Completion Rate",
+            "gridPos": {
+                "x": 0,
+                "y": 12,
+                "w": 24,
+                "h": 8
+            },
+            "targets": [
+                {
+                    "expr": "prediction_volume",
+                    "legendFormat": "Volume",
+                    "datasource": "Prometheus"
+                },
+                {
+                    "expr": "prediction_completion_rate",
+                    "legendFormat": "Completion Rate",
+                    "datasource": "Prometheus"
+                }
+            ]
+        }
+    ]
+}

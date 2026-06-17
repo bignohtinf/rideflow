@@ -1,0 +1,133 @@
+services:
+  # ── Kafka ──────────────────────────────────────────────
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.5.0
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+    ports:
+      - "2181:2181"
+
+  kafka:
+    image: confluentinc/cp-kafka:7.5.0
+    depends_on: [zookeeper]
+    ports:
+      - "9092:9092"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+
+  # ── MLflow ─────────────────────────────────────────────
+  # Chạy local nhưng lưu artifacts lên S3 (AWS thật).
+  # Team truy cập qua http://<server-ip>:5000
+  mlflow:
+    image: ghcr.io/mlflow/mlflow:v2.13.0
+    ports:
+      - "5000:5000"
+    environment:
+      MLFLOW_S3_ENDPOINT_URL: ""
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+      AWS_DEFAULT_REGION: ${AWS_DEFAULT_REGION}
+    command: >
+      mlflow server
+        --backend-store-uri sqlite:///mlflow.db
+        --default-artifact-root s3://rideflow/mlflow/
+        --host 0.0.0.0
+        --port 5000
+
+  # ── Dagster ────────────────────────────────────────────
+  # Orchestrator chạy local, kết nối AWS (S3, Redshift, ElastiCache) qua credentials.
+  dagster-webserver:
+    build:
+      context: ..
+      dockerfile: infra/Dockerfile.dagster
+    ports:
+      - "3001:3001"
+    depends_on: [dagster-daemon, mlflow]
+    environment:
+      DAGSTER_HOME: /opt/dagster/dagster_home
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+      AWS_DEFAULT_REGION: ${AWS_DEFAULT_REGION}
+      MLFLOW_TRACKING_URI: http://mlflow:5000
+      PUSHGATEWAY_URL: pushgateway:9091
+    command: dagster-webserver -h 0.0.0.0 -p 3001 -w /opt/dagster/workspace.yaml
+    volumes:
+      - dagster_home:/opt/dagster/dagster_home
+
+  dagster-daemon:
+    build:
+      context: ..
+      dockerfile: infra/Dockerfile.dagster
+    depends_on: [mlflow]
+    environment:
+      DAGSTER_HOME: /opt/dagster/dagster_home
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+      AWS_DEFAULT_REGION: ${AWS_DEFAULT_REGION}
+      MLFLOW_TRACKING_URI: http://mlflow:5000
+      PUSHGATEWAY_URL: pushgateway:9091
+    command: dagster-daemon run
+    volumes:
+      - dagster_home:/opt/dagster/dagster_home
+
+  # ── Prometheus ─────────────────────────────────────────
+  prometheus:
+    image: prom/prometheus:v2.51.0
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.retention.time=30d"
+
+  # ── Pushgateway ────────────────────────────────────────
+  pushgateway:
+    image: prom/pushgateway:v1.8.0
+    ports:
+      - "9091:9091"
+
+  # ── Grafana ────────────────────────────────────────────
+  # Team truy cập qua http://<server-ip>:3000
+  grafana:
+    image: grafana/grafana:10.4.0
+    ports:
+      - "3000:3000"
+    depends_on: [prometheus]
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: admin
+      GF_AUTH_ANONYMOUS_ENABLED: "true"
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ../monitoring/grafana/rideflow.json:/etc/grafana/provisioning/dashboards/rideflow.json:ro
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+
+  # ── Serve API ──────────────────────────────────────────
+  # Load model từ MLflow, serve predictions. Feast đọc features từ ElastiCache (AWS).
+  serve:
+    build:
+      context: ..
+      dockerfile: deployment/Dockerfile
+    ports:
+      - "8000:8000"
+    depends_on: [mlflow]
+    environment:
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+      AWS_DEFAULT_REGION: ${AWS_DEFAULT_REGION}
+      MLFLOW_TRACKING_URI: http://mlflow:5000
+      PUSHGATEWAY_URL: pushgateway:9091
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+volumes:
+  grafana_data:
+  dagster_home:

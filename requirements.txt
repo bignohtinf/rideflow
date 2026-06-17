@@ -1,0 +1,35 @@
+# Data & Feature Store
+feast[redis]
+great_expectations
+pandas
+numpy
+boto3
+
+# ML
+scikit-learn
+lightgbm
+xgboost
+catboost
+mlflow
+
+# Orchestration
+dagster
+dagster-webserver
+dagster-daemon
+
+# Serving
+fastapi
+uvicorn[standard]
+
+# Monitoring
+prometheus-client
+evidently
+
+# Streaming
+confluent-kafka
+
+# Spark
+pyspark
+
+# Config
+pyyaml

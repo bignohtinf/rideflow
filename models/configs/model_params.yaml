@@ -1,0 +1,82 @@
+model:
+  primary: lightgbm
+  baseline: logistic_regression
+
+  # ── LightGBM ──────────────────────────────────────────────
+  lightgbm:
+    objective: binary
+    metric: [binary_logloss, auc]
+    boosting_type: gbdt
+    n_estimators: 1000
+    num_leaves: 63
+    learning_rate: 0.05
+    max_depth: 10
+    min_child_samples: 50
+    subsample: 0.8
+    colsample_bytree: 0.8
+    reg_alpha: 0.1
+    reg_lambda: 1.0
+    early_stopping_rounds: 50
+    verbose: -1
+
+  # ── XGBoost ───────────────────────────────────────────────
+  xgboost:
+    objective: binary:logistic
+    eval_metric: [logloss, auc]
+    n_estimators: 1000
+    max_depth: 8
+    learning_rate: 0.05
+    subsample: 0.8
+    colsample_bytree: 0.8
+    reg_alpha: 0.1
+    reg_lambda: 1.0
+    early_stopping_rounds: 50
+
+  # ── CatBoost ──────────────────────────────────────────────
+  catboost:
+    iterations: 1000
+    learning_rate: 0.05
+    depth: 8
+    l2_leaf_reg: 3.0
+    border_count: 254
+    bagging_temperature: 1.0
+    random_strength: 1.0
+
+  # ── Random Forest ─────────────────────────────────────────
+  random_forest:
+    n_estimators: 672
+    max_depth: 8
+    min_samples_leaf: 5
+    min_samples_split: 50
+    max_features: 0.3
+    bootstrap: true
+    class_weight: balanced
+
+  # ── Calibration ───────────────────────────────────────────
+  calibration:
+    method: isotonic  # platt | isotonic
+    cv_folds: 5
+
+training:
+  test_size: 0.15
+  val_size: 0.15
+  split_strategy: temporal  # temporal | stratified
+  random_seed: 42
+
+  tuning:
+    enabled: true
+    engine: optuna
+    n_trials: 100
+    timeout_seconds: 3600
+
+evaluation:
+  metrics:
+    - auc_roc
+    - auc_pr
+    - log_loss
+    - ece
+    - precision_at_k
+  thresholds:
+    auc_roc_min: 0.80
+    log_loss_max: 0.25
+    ece_max: 0.05

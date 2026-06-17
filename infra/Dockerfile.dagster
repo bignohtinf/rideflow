@@ -1,0 +1,27 @@
+# [FIX] New file — Dagster container for pipeline orchestration.
+#   Without this, schedules and sensors don't run → no automatic pipeline.
+FROM python:3.11-slim
+
+WORKDIR /opt/dagster
+
+# Install Java for Spark submit
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends openjdk-17-jre-headless curl && \
+    rm -rf /var/lib/apt/lists/*
+
+# Install Python dependencies
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt && \
+    pip install --no-cache-dir dagster-webserver dagster-daemon pyspark
+
+# Copy project code
+COPY . /opt/dagster/app
+WORKDIR /opt/dagster/app
+
+# Dagster home for run storage
+RUN mkdir -p /opt/dagster/dagster_home
+COPY infra/dagster.yaml /opt/dagster/dagster_home/dagster.yaml
+COPY dagster_workspace/workspace.yaml /opt/dagster/workspace.yaml
+
+ENV DAGSTER_HOME=/opt/dagster/dagster_home
+ENV PYTHONPATH=/opt/dagster/app

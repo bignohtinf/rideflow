@@ -1,0 +1,26 @@
+# [IMPROVED] Added complete Seldon deployment config (was empty file)
+apiVersion: machinelearning.seldon.io/v1
+kind: SeldonDeployment
+metadata:
+  name: ride-completion
+  namespace: rideflow
+spec:
+  predictors:
+    - name: default
+      replicas: 2
+      graph:
+        name: classifier
+        implementation: MLFLOW_SERVER
+        modelUri: "s3://rideflow/mlflow/"
+        envSecretRefName: aws-credentials
+      componentSpecs:
+        - spec:
+            containers:
+              - name: classifier
+                resources:
+                  requests:
+                    cpu: "500m"
+                    memory: "512Mi"
+                  limits:
+                    cpu: "1"
+                    memory: "1Gi"

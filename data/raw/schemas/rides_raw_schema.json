@@ -1,0 +1,155 @@
+{
+    "name": "rides_raw",
+    "version": "1.0",
+    "fields": {
+        "order_id": {
+            "type": "string",
+            "nullable": false
+        },
+        "matching_batch_id": {
+            "type": "string",
+            "nullable": false
+        },
+        "driver_id": {
+            "type": "string",
+            "nullable": false
+        },
+        "num_drivers": {
+            "type": "integer",
+            "nullable": false,
+            "min": 1
+        },
+        "num_orders": {
+            "type": "integer",
+            "nullable": false,
+            "min": 0
+        },
+        "eta_avg": {
+            "type": "float",
+            "nullable": false,
+            "min": 0
+        },
+        "eta_std": {
+            "type": "float",
+            "nullable": true
+        },
+        "eta_min": {
+            "type": "float",
+            "nullable": false,
+            "min": 0
+        },
+        "eta_inv1": {
+            "type": "float",
+            "nullable": false
+        },
+        "eta_inv10": {
+            "type": "float",
+            "nullable": false
+        },
+        "eta_inv100": {
+            "type": "float",
+            "nullable": false
+        },
+        "eda_avg": {
+            "type": "float",
+            "nullable": false,
+            "min": 0
+        },
+        "eda_std": {
+            "type": "float",
+            "nullable": true
+        },
+        "eda_min": {
+            "type": "float",
+            "nullable": false,
+            "min": 0
+        },
+        "eda_inv1": {
+            "type": "float",
+            "nullable": false
+        },
+        "eda_inv10": {
+            "type": "float",
+            "nullable": false
+        },
+        "eda_inv100": {
+            "type": "float",
+            "nullable": false
+        },
+        "hour_of_day": {
+            "type": "float",
+            "nullable": false,
+            "min": 0,
+            "max": 23
+        },
+        "minute_of_hour": {
+            "type": "float",
+            "nullable": false,
+            "min": 0,
+            "max": 59
+        },
+        "rush_hour": {
+            "type": "float",
+            "nullable": false,
+            "values": [
+                0,
+                1
+            ]
+        },
+        "travel_mode": {
+            "type": "integer",
+            "nullable": false,
+            "values": [
+                1,
+                2,
+                3
+            ]
+        },
+        "user_waiting_time_seconds": {
+            "type": "integer",
+            "nullable": false
+        },
+        "distance": {
+            "type": "float",
+            "nullable": false,
+            "min": 0
+        },
+        "total_fee": {
+            "type": "float",
+            "nullable": false,
+            "min": 0
+        },
+        "total_pay": {
+            "type": "float",
+            "nullable": false,
+            "min": 0
+        },
+        "est_time_arrival": {
+            "type": "float",
+            "nullable": false,
+            "min": 0
+        },
+        "est_distance_arrival": {
+            "type": "float",
+            "nullable": false,
+            "min": 0
+        },
+        "estimate_dropoff_time": {
+            "type": "float",
+            "nullable": false
+        },
+        "is_completed": {
+            "type": "integer",
+            "nullable": false,
+            "values": [
+                0,
+                1
+            ]
+        },
+        "date": {
+            "type": "string",
+            "nullable": false,
+            "format": "YYYY-MM-DD"
+        }
+    }
+}

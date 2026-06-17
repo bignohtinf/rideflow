@@ -1,0 +1,13 @@
+keys/*
+
+.env
+
+.venv/*
+
+*.parquet
+
+__pycache__
+*.pyc
+*.log
+
+.vscode/*
