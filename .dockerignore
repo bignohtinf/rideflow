@@ -1,0 +1,12 @@
+# Loại artifacts runtime & venv khỏi build context — nếu không, demo/_mlflow cũ
+# (chứa đường dẫn tuyệt đối của host) sẽ bị copy vào image và làm hỏng registry.
+.venv-demo/
+.venv/
+demo/_data/
+demo/_mlflow/
+demo/_artifacts/
+demo/feature_repo/data/
+**/__pycache__/
+*.pyc
+*.log
+.git/
