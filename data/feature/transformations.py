@@ -17,7 +17,7 @@ def add_confidence_features(df: pd.DataFrame) -> pd.DataFrame:
 
 def add_trip_value_features(df: pd.DataFrame) -> pd.DataFrame:
     df["fee_per_km"] = df["total_fee"] / (df["distance"] + 0.01)
-    df["eta_per_km"] = df["eta_avg"] / (df["eda_avg"] + 0.01)
+    df["eta_per_km"] = df["eta_avg"] / (df["distance"] + 0.01)
     df["eta_eda_ratio"] = df["eta_avg"] / (df["eda_avg"] + 0.01)
     df["pickup_to_trip_ratio"] = df["eda_avg"] / (df["distance"] + 0.01)
     return df
