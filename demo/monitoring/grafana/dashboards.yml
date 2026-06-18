@@ -1,0 +1,7 @@
+apiVersion: 1
+providers:
+  - name: RideFlow
+    type: file
+    folder: RideFlow
+    options:
+      path: /var/lib/grafana/dashboards

@@ -1,0 +1,113 @@
+{
+  "uid": "rideflow-demo",
+  "title": "RideFlow — Serving Monitoring",
+  "tags": ["rideflow", "demo"],
+  "timezone": "browser",
+  "schemaVersion": 39,
+  "version": 1,
+  "refresh": "5s",
+  "time": { "from": "now-15m", "to": "now" },
+  "panels": [
+    {
+      "id": 1,
+      "title": "Tổng số dự đoán",
+      "type": "stat",
+      "gridPos": { "h": 6, "w": 6, "x": 0, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+      "targets": [
+        { "expr": "sum(rideflow_predictions_total)", "refId": "A" }
+      ]
+    },
+    {
+      "id": 2,
+      "title": "Tốc độ dự đoán (req/s)",
+      "type": "timeseries",
+      "gridPos": { "h": 6, "w": 9, "x": 6, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+      "targets": [
+        { "expr": "sum(rate(rideflow_predictions_total[1m]))", "refId": "A", "legendFormat": "req/s" }
+      ]
+    },
+    {
+      "id": 3,
+      "title": "Latency p95 (giây)",
+      "type": "timeseries",
+      "gridPos": { "h": 6, "w": 9, "x": 15, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+      "targets": [
+        { "expr": "histogram_quantile(0.95, sum(rate(rideflow_prediction_latency_seconds_bucket[5m])) by (le))", "refId": "A", "legendFormat": "p95" }
+      ]
+    },
+    {
+      "id": 4,
+      "title": "Dự đoán theo nhãn",
+      "type": "piechart",
+      "gridPos": { "h": 8, "w": 8, "x": 0, "y": 6 },
+      "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+      "targets": [
+        { "expr": "sum by (predicted_label) (rideflow_predictions_total)", "refId": "A", "legendFormat": "label {{predicted_label}}" }
+      ]
+    },
+    {
+      "id": 5,
+      "title": "Xác suất hoàn thành trung bình",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 16, "x": 8, "y": 6 },
+      "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+      "targets": [
+        { "expr": "rate(rideflow_completion_prob_sum[5m]) / rate(rideflow_completion_prob_count[5m])", "refId": "A", "legendFormat": "avg prob" }
+      ]
+    },
+    {
+      "id": 6,
+      "title": "DRIFT — Feedback loop",
+      "type": "row",
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 14 }
+    },
+    {
+      "id": 7,
+      "title": "Trạng thái drift",
+      "type": "stat",
+      "gridPos": { "h": 6, "w": 6, "x": 0, "y": 15 },
+      "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+      "options": { "colorMode": "background" },
+      "fieldConfig": { "defaults": { "mappings": [
+        { "type": "value", "options": { "0": { "text": "OK", "color": "green" }, "1": { "text": "DRIFT", "color": "red" } } }
+      ], "thresholds": { "steps": [ { "color": "green", "value": null }, { "color": "red", "value": 1 } ] } } },
+      "targets": [ { "expr": "max(rideflow_drift_detected)", "refId": "A" } ]
+    },
+    {
+      "id": 8,
+      "title": "PSI lớn nhất (ngưỡng 0.2)",
+      "type": "gauge",
+      "gridPos": { "h": 6, "w": 6, "x": 6, "y": 15 },
+      "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+      "fieldConfig": { "defaults": { "min": 0, "max": 2, "thresholds": { "steps": [
+        { "color": "green", "value": null }, { "color": "orange", "value": 0.1 }, { "color": "red", "value": 0.2 }
+      ] } } },
+      "targets": [ { "expr": "max(rideflow_drift_psi_max)", "refId": "A" } ]
+    },
+    {
+      "id": 9,
+      "title": "PSI theo cột (top 10)",
+      "type": "bargauge",
+      "gridPos": { "h": 6, "w": 12, "x": 12, "y": 15 },
+      "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+      "options": { "orientation": "horizontal", "displayMode": "gradient" },
+      "fieldConfig": { "defaults": { "thresholds": { "steps": [
+        { "color": "green", "value": null }, { "color": "orange", "value": 0.1 }, { "color": "red", "value": 0.2 }
+      ] } } },
+      "targets": [ { "expr": "topk(10, rideflow_drift_psi)", "refId": "A", "legendFormat": "{{column}}" } ]
+    }
+  ],
+  "templating": {
+    "list": [
+      {
+        "name": "DS_PROMETHEUS",
+        "type": "datasource",
+        "query": "prometheus",
+        "current": { "text": "Prometheus", "value": "Prometheus" }
+      }
+    ]
+  }
+}

@@ -1,0 +1,15 @@
+global:
+  scrape_interval: 5s
+  evaluation_interval: 5s
+
+scrape_configs:
+  # Scrape trực tiếp FastAPI serve (/metrics) — pull model.
+  - job_name: rideflow-serve
+    static_configs:
+      - targets: ["serve:8000"]
+
+  # Pushgateway: metric drift/PSI dạng batch do drift_sensor đẩy lên.
+  - job_name: pushgateway
+    honor_labels: true
+    static_configs:
+      - targets: ["pushgateway:9091"]
