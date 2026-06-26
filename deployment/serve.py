@@ -10,6 +10,8 @@ from pydantic import BaseModel
 from feast import FeatureStore
 from loguru import logger
 
+from data.feature.transformations import add_interaction_features, add_time_features
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     logger.info("Loading model and feature store...")
@@ -80,6 +82,10 @@ def predict(request: PredictRequest):
             status_code=404,
             detail=f"No features found for order_id={request.order_id}",
         )
+
+    # Tính on-demand interactions — dùng chung transformations.py với training
+    features = add_time_features(features)
+    features = add_interaction_features(features)
 
     try:
         prob = app.state.model.predict_proba(features)[:, 1][0]

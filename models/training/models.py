@@ -76,7 +76,7 @@ def build_model(model_name: str, model_config: dict | None = None):
     defaults = _DEFAULTS.get(canonical_name, {})
     params = {**defaults, **model_config.get(canonical_name, {})}
 
-    yaml_only_keys = {"objective", "metric", "boosting_type", "early_stopping_rounds"}
+    yaml_only_keys = {"objective", "metric", "boosting_type", "early_stopping_rounds", "eval_metric"}
     clean_params = {k: v for k, v in params.items() if k not in yaml_only_keys}
 
     logger.info(f"Building {canonical_name} with params: {clean_params}")

@@ -1,5 +1,5 @@
 services:
-  # ── Kafka ──────────────────────────────────────────────
+  # Kafka
   zookeeper:
     image: confluentinc/cp-zookeeper:7.5.0
     environment:
@@ -19,11 +19,9 @@ services:
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
 
-  # ── MLflow ─────────────────────────────────────────────
-  # Chạy local nhưng lưu artifacts lên S3 (AWS thật).
-  # Team truy cập qua http://<server-ip>:5000
+  # MLflow
   mlflow:
-    image: ghcr.io/mlflow/mlflow:v2.13.0
+    image: ghcr.io/mlflow/mlflow:v3.1.0
     ports:
       - "5000:5000"
     environment:
@@ -38,8 +36,7 @@ services:
         --host 0.0.0.0
         --port 5000
 
-  # ── Dagster ────────────────────────────────────────────
-  # Orchestrator chạy local, kết nối AWS (S3, Redshift, ElastiCache) qua credentials.
+  # Dagster
   dagster-webserver:
     build:
       context: ..
@@ -57,6 +54,7 @@ services:
     command: dagster-webserver -h 0.0.0.0 -p 3001 -w /opt/dagster/workspace.yaml
     volumes:
       - dagster_home:/opt/dagster/dagster_home
+      - ..:/opt/dagster/app
 
   dagster-daemon:
     build:
@@ -70,11 +68,12 @@ services:
       AWS_DEFAULT_REGION: ${AWS_DEFAULT_REGION}
       MLFLOW_TRACKING_URI: http://mlflow:5000
       PUSHGATEWAY_URL: pushgateway:9091
-    command: dagster-daemon run
+    command: dagster-daemon run -w /opt/dagster/workspace.yaml
     volumes:
       - dagster_home:/opt/dagster/dagster_home
+      - ..:/opt/dagster/app
 
-  # ── Prometheus ─────────────────────────────────────────
+  # Prometheus
   prometheus:
     image: prom/prometheus:v2.51.0
     ports:
@@ -85,14 +84,13 @@ services:
       - "--config.file=/etc/prometheus/prometheus.yml"
       - "--storage.tsdb.retention.time=30d"
 
-  # ── Pushgateway ────────────────────────────────────────
+  # Pushgateway
   pushgateway:
     image: prom/pushgateway:v1.8.0
     ports:
       - "9091:9091"
 
-  # ── Grafana ────────────────────────────────────────────
-  # Team truy cập qua http://<server-ip>:3000
+  # Grafana
   grafana:
     image: grafana/grafana:10.4.0
     ports:
@@ -104,11 +102,9 @@ services:
       GF_AUTH_ANONYMOUS_ENABLED: "true"
     volumes:
       - grafana_data:/var/lib/grafana
-      - ../monitoring/grafana/rideflow.json:/etc/grafana/provisioning/dashboards/rideflow.json:ro
       - ./grafana/provisioning:/etc/grafana/provisioning:ro
 
-  # ── Serve API ──────────────────────────────────────────
-  # Load model từ MLflow, serve predictions. Feast đọc features từ ElastiCache (AWS).
+  # Serve API
   serve:
     build:
       context: ..

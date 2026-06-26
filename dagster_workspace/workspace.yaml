@@ -1,4 +1,4 @@
 load_from:
   - python_file:
-      relative_path: repository.py
+      relative_path: app/dagster_workspace/repository.py
       working_directory: /opt/dagster/app

@@ -41,7 +41,7 @@ def register(run_id: str, model_name: str = "ride_completion") -> str:
 
     try:
         result = mlflow.register_model(
-            model_uri=f"runs:{run_id}/model",
+            model_uri=f"runs:/{run_id}/model",
             name=model_name,
         )
         _set_staging_alias(client, model_name, result.version)

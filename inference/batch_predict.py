@@ -30,6 +30,39 @@ def predict(target_date: str):
     order_ids = df["order_id"] if "order_id" in df.columns else df.index
     X = df.drop(columns=[TARGET, "order_id"], errors="ignore")
 
+    # Only keep features the model was trained on
+    expected_features = model.feature_names_in_ if hasattr(model, "feature_names_in_") else None
+    if expected_features is not None:
+        extra = set(X.columns) - set(expected_features)
+        if extra:
+            logger.warning(f"Dropping {len(extra)} unexpected columns: {extra}")
+            X = X[[c for c in expected_features if c in X.columns]]
+        missing = set(expected_features) - set(X.columns)
+        if missing:
+            logger.warning(f"Missing {len(missing)} expected columns: {missing}")
+
+    # Convert HH:MM string columns sang minutes
+    for col in X.columns:
+        if X[col].dtype == object:
+            hhmm_mask = X[col].dropna().str.match(r"^\d{1,2}:\d{2}$", na=False)
+            if hhmm_mask.mean() > 0.5:
+                def _to_minutes(x):
+                    if pd.isna(x):
+                        return None
+                    try:
+                        h, m = str(x).split(":")
+                        return int(h) * 60 + int(m)
+                    except (ValueError, AttributeError):
+                        return None
+                X[col] = X[col].apply(_to_minutes).astype(float)
+                logger.info(f"Converted column '{col}' from HH:MM to minutes")
+
+    # Drop any remaining non-numeric columns CatBoost can't handle
+    non_numeric = X.select_dtypes(exclude=["number"]).columns.tolist()
+    if non_numeric:
+        logger.warning(f"Dropping non-numeric columns: {non_numeric}")
+        X = X.drop(columns=non_numeric)
+
     preds = model.predict_proba(X)[:, 1]
 
     output = pd.DataFrame({

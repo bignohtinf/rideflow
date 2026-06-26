@@ -15,7 +15,6 @@ mlflow
 # Orchestration
 dagster
 dagster-webserver
-dagster-daemon
 
 # Serving
 fastapi
@@ -23,13 +22,15 @@ uvicorn[standard]
 
 # Monitoring
 prometheus-client
-evidently
+evidently<0.5
 
 # Streaming
 confluent-kafka
 
 # Spark
-pyspark
+pyspark==4.1.2
 
 # Config
 pyyaml
+loguru
+python-dotenv

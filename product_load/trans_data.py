@@ -27,7 +27,7 @@ import pandas as pd
 
 BUCKET = "rideflow"
 S3_PREFIX = "raw/rides"
-PRODUCTION_FILE = "data/storage/production.parquet"
+PRODUCTION_FILE = "data/processed/raw_production.parquet"
 
 
 def load_production_data(path: str) -> pd.DataFrame:

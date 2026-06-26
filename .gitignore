@@ -11,3 +11,13 @@ __pycache__
 *.log
 
 .vscode/*
+
+mlruns/*
+
+*.db
+
+RideFlow_Technical_Report.tex
+RideFlow_Technical_Report.md
+rideflow_overview.pptx
+
+__pycache__/*

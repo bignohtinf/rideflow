@@ -21,7 +21,7 @@ def run_batch_predict(context) -> str:
 
 
 @op(ins={"target_date": In(str)})
-def log_prediction_metrics(target_date: str):
+def log_prediction_metrics(context, target_date: str):
     preds = pd.read_parquet(
         f"s3://rideflow/predictions/{target_date}/predictions.parquet"
     )
@@ -33,6 +33,17 @@ def log_prediction_metrics(target_date: str):
             "median_completion_prob": preds["completion_prob"].median(),
         })
         mlflow.log_param("date", target_date)
+
+    # Auto-push metrics to Pushgateway after inference
+    context.log.info("Pushing prediction metrics to Pushgateway ...")
+    result = subprocess.run(
+        ["python", "monitoring/push_metrics.py"],
+        check=False, capture_output=True, text=True,
+    )
+    if result.returncode != 0:
+        context.log.warning(f"push_metrics failed (non-fatal):\n{result.stderr}")
+    else:
+        context.log.info(f"push_metrics output:\n{result.stdout}")
 
 @job
 def inference_pipeline():

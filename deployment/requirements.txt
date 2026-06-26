@@ -1,0 +1,15 @@
+fastapi
+uvicorn[standard]
+mlflow
+boto3
+pandas
+numpy
+scikit-learn
+lightgbm
+xgboost
+catboost
+feast[redis]
+prometheus-client
+loguru
+python-dotenv
+pyyaml

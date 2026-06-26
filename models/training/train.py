@@ -1,3 +1,5 @@
+import os
+os.environ.setdefault("AWS_REQUEST_CHECKSUM_CALCULATION", "WHEN_REQUIRED")
 import sys
 import mlflow
 import mlflow.sklearn
@@ -15,6 +17,27 @@ TARGET = "is_completed"
 SEED = 42
 CV = StratifiedKFold(n_splits=5, shuffle=True, random_state=SEED)
 
+S3_STORAGE_OPTIONS = {
+    "key": os.environ.get("AWS_ACCESS_KEY_ID"),
+    "secret": os.environ.get("AWS_SECRET_ACCESS_KEY"),
+    "client_kwargs": {
+        "region_name": os.environ.get("AWS_DEFAULT_REGION", "us-east-1"),
+    },
+}
+
+SKOPS_TRUSTED_TYPES = [
+    "collections.OrderedDict",
+    "lightgbm.basic.Booster",
+    "lightgbm.sklearn.LGBMClassifier",
+    "xgboost.core.Booster",
+    "xgboost.sklearn.XGBClassifier",
+    "catboost.core.CatBoostClassifier",
+    "sklearn.ensemble._forest.RandomForestClassifier",
+    "sklearn.calibration.CalibratedClassifierCV",
+    "numpy.dtype",
+    "numpy.ndarray",
+]
+
 CONFIG_PATH = Path("models/configs/model_params.yaml")
 
 def load_config() -> dict:
@@ -26,7 +49,10 @@ def load_config() -> dict:
 
 
 def load_features(target_date: str) -> pd.DataFrame:
-    return pd.read_parquet(f"s3://{BUCKET}/features/{target_date}/features.parquet")
+    return pd.read_parquet(
+        f"s3://{BUCKET}/features/{target_date}/features.parquet",
+        storage_options=S3_STORAGE_OPTIONS,
+    )
 
 
 def get_X_y(df: pd.DataFrame):
@@ -79,14 +105,18 @@ def train(target_date: str, model_name: str = "lgbm") -> tuple[str, dict]:
         logger.info(f"AUC-ROC: {metrics['AUC-ROC']:.4f}")
 
         model.fit(X, y)
-        mlflow.sklearn.log_model(model, artifact_path="model")
+        mlflow.sklearn.log_model(
+            model,
+            artifact_path="model",
+            skops_trusted_types=SKOPS_TRUSTED_TYPES,
+        )
 
         # Save reference set for drift detection
         reference = df.groupby(TARGET, group_keys=False).apply(
             lambda g: g.sample(frac=0.2, random_state=SEED)
         )
         ref_path = f"s3://{BUCKET}/features/reference/features.parquet"
-        reference.to_parquet(ref_path)
+        reference.to_parquet(ref_path, storage_options=S3_STORAGE_OPTIONS)
 
         return run.info.run_id, metrics
 
